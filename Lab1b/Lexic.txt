@@ -1,0 +1,18 @@
+    <Alphabet>::=<letter>|<decimal>
+    <letter>::=a|b|c|...|z
+    <decimal>::=0|1|2|3|4|5|6|7|8|9
+    
+    <Special symbol>::=<operator>|<separator>|<reserved word>
+    <sign>::=+|-
+    <operator>::=<sign>|:|*
+    <separator>::=()|[]||{}|.
+    <reserved word>::=beint|read|write|if|else|for|while|stop|const
+
+    <Identifier>::=<letter>|<letter><l&d>
+    <l&d>::=<letters>|<decimals>
+    <letters>::=<letter>|letter<letters>
+    <decimals>::=<decimal>|<decimal><decimals>
+
+    <Constant>::=<number>|<caracter>
+    <number>::=<decimals>|<sign><decimals>
+    <caracter>::=<decimal><letter>

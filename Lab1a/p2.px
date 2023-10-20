@@ -1,0 +1,12 @@
+*
+beint a,d.
+read>a.
+d~2.
+while d<a/2(
+    if a/d=0.
+        write<{nu}.
+        stop.
+    d~d+1.
+)
+write<{da}.
+*
