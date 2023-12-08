@@ -1,0 +1,1 @@
+SymbolTable { elements=[[], [], [], [], [], [], [], [], [], []], size = 10 }

@@ -1,0 +1,12 @@
+Stetco Claudiu
+
+Link to project: https://github.com/StetcoClaudiu/FLCD/tree/main/lab3
+
+PIF:
+PIF is represented as an array of pairs of (String,(Integer, Integer)
+
+SymbolTable:
+We have 2 symbolTables one for variables and one for constants
+
+The code is readed as an string than is sepatated by the spaces in an new array of string. 
+Then we will go throught every element of the array and start scanning

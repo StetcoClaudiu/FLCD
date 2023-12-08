@@ -1,0 +1,9 @@
+beint a,b,1c.
+read>a.
+read>b.
+read>1c.
+if a<b
+    a~b.^
+if a<c
+    a~1c.
+write<a.
