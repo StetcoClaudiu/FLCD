@@ -1,86 +1,77 @@
-from tabulate import tabulate
-
-class Node:
+class TreeNode:
     def __init__(self, value):
-        # Initialize a node in the parsing tree.
         self.father = -1
         self.sibling = -1
         self.value = value
         self.production = -1
 
     def __str__(self):
-        # String representation of the Node for debugging purposes.
-        return str(self.value) + "  " + str(self.father) + "  " + str(self.sibling)
+        return f"{self.value}  {self.father}  {self.sibling}"
 
-
-class ParserOutput:
-    def __init__(self, grammar, sequence_file):
-        # Initialize ParserOutput with grammar, input sequence, and an empty tree.
-        self.grammar = grammar
-        self.sequence = self.read_sequence(sequence_file)
-        self.tree = []
+class ParsingOutput:
+    def __init__(self, cfg_grammar, sequence_file):
+        self.cfg_grammar = cfg_grammar
+        self.sequence = self.load_sequence(sequence_file)
+        self.tree_nodes = []
 
     @staticmethod
-    def read_sequence(seq_file):
-        # Static method to read the input sequence from a file.
+    def load_sequence(seq_file):
         seq = []
         with open(seq_file) as f:
-            line = f.readline()
-            while line:
+            for line in f:
                 seq.append(line.strip())
-                line = f.readline()
         return seq
 
-    def create_parsing_tree(self, working):
-        # Create a parsing tree based on the working set of the parser.
+    def build_tree(self, working_stack):
         father = -1
-        for index in range(0, len(working)):
-            if type(working[index]) == tuple:
-                self.tree.append(Node(working[index][0]))
-                self.tree[index].production = working[index][1]
+        for index in range(len(working_stack)):
+            if type(working_stack[index]) == tuple:
+                self.tree_nodes.append(TreeNode(working_stack[index][0]))
+                self.tree_nodes[index].production = working_stack[index][1]
             else:
-                self.tree.append(Node(working[index]))
+                self.tree_nodes.append(TreeNode(working_stack[index]))
 
-        for index in range(0, len(working)):
-            if type(working[index]) == tuple:
-                self.tree[index].father = father
+        for index in range(len(working_stack)):
+            if type(working_stack[index]) == tuple:
+                self.tree_nodes[index].father = father
                 father = index
-                len_prod = len(self.grammar.get_productions()[working[index][0]][working[index][1]])
+                len_prod = len(self.cfg_grammar.get_productions()[working_stack[index][0]][working_stack[index][1]])
                 vector_indx = []
                 for i in range(1, len_prod + 1):
                     vector_indx.append(index + i)
-                for i in range(0, len_prod):
-                    if self.tree[vector_indx[i]].production != -1:
-                        offset = self.get_len_depth(vector_indx[i], working)
+                for i in range(len_prod):
+                    if self.tree_nodes[vector_indx[i]].production != -1:
+                        offset = self.calculate_depth(vector_indx[i], working_stack)
                         for j in range(i + 1, len_prod):
                             vector_indx[j] += offset
-                for i in range(0, len_prod - 1):
-                    self.tree[vector_indx[i]].sibling = vector_indx[i + 1]
+                for i in range(len_prod - 1):
+                    self.tree_nodes[vector_indx[i]].sibling = vector_indx[i + 1]
             else:
-                self.tree[index].father = father
+                self.tree_nodes[index].father = father
                 father = -1
 
-    def get_len_depth(self, index, working):
-        # Helper method to calculate the depth of a node in the parsing tree.
-        production = self.grammar.get_productions()[working[index][0]][working[index][1]]
+    def calculate_depth(self, index, working_stack):
+        production = self.cfg_grammar.get_productions()[working_stack[index][0]][working_stack[index][1]]
         len_prod = len(production)
         sum_depth = len_prod
         for i in range(1, len_prod + 1):
-            if type(working[index + i]) == tuple:
-                sum_depth += self.get_len_depth(index + i, working)
+            if type(working_stack[index + i]) == tuple:
+                sum_depth += self.calculate_depth(index + i, working_stack)
         return sum_depth
 
-    def write_parsing_tree(self, state, working, output_file=None):
-        # Display or write the parsing tree based on the parser's state.
+    def write_tree(self, state, working_stack, output_file=None):
         if state != "e":
-            table = [["index", "value", "father", "sibling"]]
-            for index in range(0, len(working)):
-                table.append([index, self.tree[index].value, self.tree[index].father, self.tree[index].sibling])
+            lines = ["Parsing tree:"]
+            lines.append("{:<10} {:<15} {:<10} {:<10}".format("index", "value", "father", "sibling"))
 
-            print("Parsing tree:")
-            print(tabulate(table, headers="firstrow", tablefmt="grid"))
+            for index in range(len(working_stack)):
+                value = self.tree_nodes[index].value if self.tree_nodes[index].value else "N/A"
+                lines.append("{:<10} {:<15} {:<10} {:<10}".format(index, value,
+                                                                    self.tree_nodes[index].father,
+                                                                    self.tree_nodes[index].sibling))
+
+            print("\n".join(lines))
 
             if output_file:
                 with open(output_file, "w") as file:
-                    file.write("Parsing tree:\n")
-                    file.write(tabulate(table, headers="firstrow", tablefmt="grid"))
+                    file.write("\n".join(lines))
