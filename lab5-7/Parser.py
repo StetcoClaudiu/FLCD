@@ -1,117 +1,97 @@
 class Parser:
-    def __init__(self, grammar, sequence_file):
-        # Initialize parser with grammar, input sequence, working set, input buffer, state, and index.
-        self.grammar = grammar
-        self.sequence = self.read_sequence(sequence_file)
-        self.working = []
-        self.input = [self.grammar.get_start_symbol()]
+    def __init__(self, cfg_grammar, sequence_file):
+        self.cfg_grammar = cfg_grammar
+        self.sequence = self.load_sequence(sequence_file)
+        self.working_stack = []
+        self.input_buffer = [self.cfg_grammar.get_start_symbol()]
         self.state = "q"
         self.index = 0
 
     @staticmethod
-    def read_sequence(seq_file):
-        # Static method to read the input sequence from a file.
+    def load_sequence(seq_file):
         seq = []
         with open(seq_file) as f:
-            line = f.readline()
-            while line:
+            for line in f:
                 seq.append(line.strip())
-                line = f.readline()
         return seq
 
-    def get_situation(self):
-        # Print the current parsing situation.
-        print(f"({self.state}, {self.index}, {self.working}, {self.input})")
+    def current_situation(self):
+        print(f"({self.state}, {self.index}, {self.working_stack}, {self.input_buffer})")
 
-    def expand(self):
-        # Expand the current non-terminal in the working set.
-        print("|--- expand")
-        non_terminal = self.input.pop(0)
-        self.working.append((non_terminal, 0))
-        new_production = self.grammar.get_productions_for_non_terminal(non_terminal)[0]
-        self.input = new_production + self.input
+    def expand_non_terminal(self):
+        non_terminal = self.input_buffer.pop(0)
+        self.working_stack.append((non_terminal, 0))
+        new_production = self.cfg_grammar.get_productions_for_non_terminal(non_terminal)[0]
+        self.input_buffer = new_production + self.input_buffer
 
-    def advance(self):
-        # Advance in the parsing process.
-        print("|--- advance")
-        self.working.append(self.input.pop(0))
+    def advance_parsing(self):
+        self.working_stack.append(self.input_buffer.pop(0))
         self.index += 1
 
     def momentary_insuccess(self):
-        # Signal a momentary failure in parsing, transitioning to a backtracking state.
-        print("|--- momentary insuccess")
         self.state = "b"
 
-    def back(self):
-        # Backtrack in the parsing process.
-        print("|--- back")
-        item = self.working.pop()
-        self.input.insert(0, item)
+    def backtrack(self):
+        item = self.working_stack.pop()
+        self.input_buffer.insert(0, item)
         self.index -= 1
 
-    def success(self):
-        # Signal successful completion of parsing.
-        print("|--- success")
+    def successful_parsing(self):
         self.state = "f"
-        msg = f"(f, {self.index}, {self.working}, {self.input})\n=> sequence is syntactically correct\n"
+        msg = f"(f, {self.index}, {self.working_stack}, {self.input_buffer})\n=> sequence is syntactically correct\n"
         print(msg)
 
-    def another_try(self):
-        # Attempt another production during backtracking.
-        print("|--- another try")
-        if self.working:
-            last_nt = self.working.pop()
+    def try_another_production(self):
+        if self.working_stack:
+            last_nt = self.working_stack.pop()
             nt, production_nr = last_nt
 
-            productions = self.grammar.get_productions_for_non_terminal(nt)
+            productions = self.cfg_grammar.get_productions_for_non_terminal(nt)
 
             if production_nr + 1 < len(productions):
                 self.state = "q"
 
                 new_tuple = (nt, production_nr + 1)
-                self.working.append(new_tuple)
+                self.working_stack.append(new_tuple)
 
                 len_last_production = len(productions[production_nr])
-                self.input = self.input[len_last_production:]
+                self.input_buffer = self.input_buffer[len_last_production:]
                 new_production = productions[production_nr + 1]
-                self.input = new_production + self.input
+                self.input_buffer = new_production + self.input_buffer
             else:
                 len_last_production = len(productions[production_nr])
-                self.input = self.input[len_last_production:]
-                if not len(self.input) == 0:
-                    self.input = [nt] + self.input
+                self.input_buffer = self.input_buffer[len_last_production:]
+                if not len(self.input_buffer) == 0:
+                    self.input_buffer = [nt] + self.input_buffer
         else:
             self.state = "e"
 
-    def error(self):
-        # Signal an error state when no more input is available during parsing.
-        print("|--- error")
+    def error_state(self):
         self.state = "e"
-        msg = f"(e, {self.index}, {self.working}, {self.input})\nNo more input to look at!"
+        msg = f"(e, {self.index}, {self.working_stack}, {self.input_buffer})\nNo more input to look at!"
         print(msg)
 
-    def run(self):
-        # Execute the parsing process until a success or error state is reached.
+    def execute(self):
         while (self.state != "f") and (self.state != "e"):
-            self.get_situation()
+            self.current_situation()
             if self.state == "q":
-                if len(self.input) == 0 and self.index == len(self.sequence):
-                    self.success()
+                if len(self.input_buffer) == 0 and self.index == len(self.sequence):
+                    self.successful_parsing()
                 else:
-                    if self.input[0] in self.grammar.get_non_terminals()[0].split(" "):
-                        self.expand()
+                    if self.input_buffer[0] in self.cfg_grammar.get_non_terminals()[0].split(" "):
+                        self.expand_non_terminal()
                     else:
-                        if self.index < len(self.sequence) and self.input[0] == self.sequence[self.index]:
-                            self.advance()
+                        if self.index < len(self.sequence) and self.input_buffer[0] == self.sequence[self.index]:
+                            self.advance_parsing()
                         else:
                             self.momentary_insuccess()
             else:
                 if self.state == "b":
-                    if self.working and self.working[-1] in self.grammar.get_terminals()[0].split(" "):
-                        self.back()
+                    if self.working_stack and self.working_stack[-1] in self.cfg_grammar.get_terminals()[0].split(" "):
+                        self.backtrack()
                     else:
-                        self.another_try()
+                        self.try_another_production()
 
         if self.state == "e":
-            self.get_situation()
-            self.error()
+            self.current_situation()
+            self.error_state()
