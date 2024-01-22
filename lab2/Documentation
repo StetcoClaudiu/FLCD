@@ -1,0 +1,107 @@
+https://github.com/StetcoClaudiu/FLCD/tree/main/lab2
+
+### HashTable.java
+
+#### Class Overview
+
+The `HashTable` class is an implementation of a basic hash table in Java. It uses an array of ArrayLists to handle collisions, and the hash function is a simple sum of ASCII values of characters in the input key.
+
+#### Constructors
+
+1. **HashTable(Integer size):**
+   - Creates a new hash table with the specified size.
+   - Initializes the array with empty ArrayLists to handle collisions.
+
+#### Methods
+
+1. **String findByPos(Pair pos):**
+   - Retrieves the element at the specified position in the hash table.
+   - Throws an `IndexOutOfBoundsException` if the position is invalid.
+
+2. **Integer getSize():**
+   - Returns the size of the hash table.
+
+3. **Pair findPositionOfTerm(String term):**
+   - Finds the position (index) of a given term in the hash table.
+   - Returns a `Pair` object representing the position if found; otherwise, returns `null`.
+
+4. **private Integer hash(String key):**
+   - Computes the hash value for the given key using a simple sum of ASCII values.
+
+5. **boolean containsTerm(String term):**
+   - Checks if the hash table contains a specific term.
+   - Returns `true` if the term is found, otherwise `false`.
+
+6. **boolean add(String term):**
+   - Adds a term to the hash table if it does not already exist.
+   - Returns `true` if the term is added successfully, `false` if the term already exists.
+
+7. **String toString():**
+   - Overrides the `toString` method to provide a string representation of the hash table.
+
+### Pair.java
+
+#### Class Overview
+
+The `Pair` class represents an ordered pair of integers, commonly used to denote positions in the hash table.
+
+#### Constructors
+
+1. **Pair(Integer first, Integer second):**
+   - Creates a new `Pair` object with specified values for the first and second components.
+
+#### Methods
+
+1. **Integer getFirst():**
+   - Returns the value of the first component.
+
+2. **Integer getSecond():**
+   - Returns the value of the second component.
+
+3. **String toString():**
+   - Overrides the `toString` method to provide a string representation of the `Pair` object.
+
+### SymbolTable.java
+
+#### Class Overview
+
+The `SymbolTable` class is a wrapper around the `HashTable` class, providing a higher-level interface for symbol table operations.
+
+#### Constructors
+
+1. **SymbolTable(Integer size):**
+   - Creates a new symbol table with the specified size.
+
+#### Methods
+
+1. **String findByPos(Pair pos):**
+   - Retrieves the element at the specified position in the symbol table.
+
+2. **HashTable getHashTable():**
+   - Returns the underlying hash table.
+
+3. **Integer getSize():**
+   - Returns the size of the symbol table.
+
+4. **Pair findPositionOfTerm(String term):**
+   - Finds the position (index) of a given term in the symbol table.
+   - Returns a `Pair` object representing the position if found; otherwise, returns `null`.
+
+5. **boolean containsTerm(String term):**
+   - Checks if the symbol table contains a specific term.
+   - Returns `true` if the term is found, otherwise `false`.
+
+6. **boolean add(String term):**
+   - Adds a term to the symbol table if it does not already exist.
+   - Returns `true` if the term is added successfully, `false` if the term already exists.
+
+### Main.java
+
+#### Class Overview
+
+The `Main` class contains the `main` method for testing the functionality of the `SymbolTable` class.
+
+#### Methods
+
+1. **main(String[] args):**
+   - Demonstrates the usage of the `SymbolTable` class by performing various operations on the symbol table and printing the results to the console.
